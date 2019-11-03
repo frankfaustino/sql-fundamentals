@@ -1,8 +1,15 @@
-import { getDb } from '../db/utils';
-import { sql } from '../sql-string';
+import { getDb } from '../db/utils'
+import { sql } from '../sql-string'
 
-export const ALL_ORDERS_COLUMNS = ['*'];
-export const ORDER_COLUMNS = ['*'];
+export const ALL_ORDERS_COLUMNS = [
+  'id',
+  'customerid',
+  'employeeid',
+  'shipcity',
+  'shipcountry',
+  'shippeddate'
+]
+export const ORDER_COLUMNS = ['*']
 
 /**
  * @typedef OrderCollectionOptions
@@ -24,7 +31,7 @@ const DEFAULT_ORDER_COLLECTION_OPTIONS = Object.freeze(
     perPage: 20,
     sort: 'id'
   })
-);
+)
 
 /**
  * Retrieve a collection of "all orders" from the database.
@@ -37,15 +44,15 @@ export async function getAllOrders(opts = {}) {
   // Combine the options passed into the function with the defaults
 
   /** @type {OrderCollectionOptions} */
-  let options = {
-    ...DEFAULT_ORDER_COLLECTION_OPTIONS,
-    ...opts
-  };
+  // const options = {
+  //   ...DEFAULT_ORDER_COLLECTION_OPTIONS,
+  //   ...opts
+  // }
 
-  const db = await getDb();
+  const db = await getDb()
   return await db.all(sql`
 SELECT ${ALL_ORDERS_COLUMNS.join(',')}
-FROM CustomerOrder`);
+FROM CustomerOrder`)
 }
 
 /**
@@ -55,7 +62,7 @@ FROM CustomerOrder`);
  */
 export async function getCustomerOrders(customerId, opts = {}) {
   // ! This is going to retrieve ALL ORDERS, not just the ones that belong to a particular customer. We'll need to fix this
-  return getAllOrders(opts);
+  return getAllOrders(opts)
 }
 
 /**
@@ -64,14 +71,14 @@ export async function getCustomerOrders(customerId, opts = {}) {
  * @returns {Promise<Order>} the order
  */
 export async function getOrder(id) {
-  const db = await getDb();
+  const db = await getDb()
   return await db.get(
     sql`
 SELECT *
 FROM CustomerOrder
 WHERE id = $1`,
     id
-  );
+  )
 }
 
 /**
@@ -80,14 +87,14 @@ WHERE id = $1`,
  * @returns {Promise<OrderDetail[]>} the order details
  */
 export async function getOrderDetails(id) {
-  const db = await getDb();
+  const db = await getDb()
   return await db.all(
     sql`
 SELECT *, unitprice * quantity as price
 FROM OrderDetail
 WHERE orderid = $1`,
     id
-  );
+  )
 }
 
 /**
@@ -96,9 +103,9 @@ WHERE orderid = $1`,
  * @returns {Promise<[Order, OrderDetail[]]>} the order and respective order details
  */
 export async function getOrderWithDetails(id) {
-  let order = await getOrder(id);
-  let items = await getOrderDetails(id);
-  return [order, items];
+  let order = await getOrder(id)
+  let items = await getOrderDetails(id)
+  return [order, items]
 }
 
 /**
@@ -108,7 +115,7 @@ export async function getOrderWithDetails(id) {
  * @returns {Promise<{id: string}>} the newly created order
  */
 export async function createOrder(order, details = []) {
-  return Promise.reject('Orders#createOrder() NOT YET IMPLEMENTED');
+  return Promise.reject('Orders#createOrder() NOT YET IMPLEMENTED')
 }
 
 /**
@@ -117,7 +124,7 @@ export async function createOrder(order, details = []) {
  * @returns {Promise<any>}
  */
 export async function deleteOrder(id) {
-  return Promise.reject('Orders#deleteOrder() NOT YET IMPLEMENTED');
+  return Promise.reject('Orders#deleteOrder() NOT YET IMPLEMENTED')
 }
 
 /**
@@ -128,5 +135,5 @@ export async function deleteOrder(id) {
  * @returns {Promise<Partial<Order>>} the order
  */
 export async function updateOrder(id, data, details = []) {
-  return Promise.reject('Orders#updateOrder() NOT YET IMPLEMENTED');
+  return Promise.reject('Orders#updateOrder() NOT YET IMPLEMENTED')
 }
