@@ -1,5 +1,5 @@
-import { getDb } from '../db/utils';
-import { sql } from '../sql-string';
+import { getDb } from '../db/utils'
+import { sql } from '../sql-string'
 
 /**
  * @typedef {'sweet' | 'spicy' | 'sour' | 'salty' | 'bitter'} ProductFlavorName
@@ -31,7 +31,7 @@ import { sql } from '../sql-string';
 /**
  * Columns to select for the `getAllProducts` query
  */
-const ALL_PRODUCT_COLUMNS = ['*'];
+const ALL_PRODUCT_COLUMNS = ['*']
 
 /**
  * Retrieve a collection of all Product records from the database
@@ -39,10 +39,19 @@ const ALL_PRODUCT_COLUMNS = ['*'];
  * @returns {Promise<Product[]>} the products
  */
 export async function getAllProducts(opts = {}) {
-  const db = await getDb();
-  return await db.all(sql`
-SELECT ${ALL_PRODUCT_COLUMNS.join(',')}
-FROM Product`);
+  const db = await getDb()
+  const query = sql`
+  SELECT ${ALL_PRODUCT_COLUMNS.join(',')}
+  FROM Product
+  `
+  let predicate =
+    opts.filter && opts.filter.inventory
+      ? opts.filter.inventory === 'needs-reorder'
+        ? '\nWHERE (Product.unitsinstock + Product.unitsonorder) < Product.reorderlevel'
+        : '\nWHERE discontinued > 0'
+      : ''
+
+  return await db.all(query + predicate)
 }
 
 /**
@@ -51,14 +60,14 @@ FROM Product`);
  * @returns {Promise<Product>} the product
  */
 export async function getProduct(id) {
-  const db = await getDb();
+  const db = await getDb()
   return await db.get(
     sql`
 SELECT ${ALL_PRODUCT_COLUMNS.join(',')}
 FROM Product
 WHERE id = $1`,
     id
-  );
+  )
 }
 /**
  * Update the properties of a Product
@@ -67,7 +76,7 @@ WHERE id = $1`,
  * @returns {Promise<Product>} the product
  */
 export async function updateProduct(id, data) {
-  throw new Error('Not yet implemented');
+  throw new Error('Not yet implemented')
 }
 
 /**
@@ -76,7 +85,7 @@ export async function updateProduct(id, data) {
  * @returns {Promise<{ id: number | string }>} newly created product id
  */
 export async function createProduct(p) {
-  let db = await getDb();
+  let db = await getDb()
   let result = await db.run(
     sql`
 INSERT INTO Product (productname, supplierid, categoryid, quantityperunit, unitprice, unitsinstock, unitsonorder, reorderlevel, discontinued)
@@ -90,11 +99,11 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
     p.unitsonorder,
     p.reorderlevel,
     p.discontinued
-  );
+  )
   if (!result) {
-    throw new Error('No "last inserted id" returned from SQL insertion!');
+    throw new Error('No "last inserted id" returned from SQL insertion!')
   }
-  return { id: result.lastID };
+  return { id: result.lastID }
 }
 
 /**
@@ -103,8 +112,8 @@ VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
  * @returns {Promise<void>}
  */
 export async function deleteProduct(id) {
-  const db = await getDb();
-  await db.run(sql`DELETE FROM Product WHERE id=$1;`, id);
+  const db = await getDb()
+  await db.run(sql`DELETE FROM Product WHERE id=$1;`, id)
 }
 
 /**
@@ -113,5 +122,5 @@ export async function deleteProduct(id) {
  * @returns {Promise<ProductPriceInfo[]>} Pricing history info
  */
 export async function getProductPricingHistory(id) {
-  return [];
+  return []
 }

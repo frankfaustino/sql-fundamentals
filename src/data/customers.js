@@ -4,7 +4,7 @@ import { sql } from '../sql-string'
 /**
  * Columns to SELECT for the getAllCustomers query
  */
-const ALL_CUSTOMERS_COLUMNS = ['id', 'contactname', 'companyname']
+const ALL_CUSTOMERS_COLUMNS = ['id', 'companyname', 'contactname']
 
 /**
  * Options that may be used to customize a query for a collection of Customers
@@ -22,9 +22,15 @@ const ALL_CUSTOMERS_COLUMNS = ['id', 'contactname', 'companyname']
  */
 export async function getAllCustomers(options = {}) {
   const db = await getDb()
-  return await db.all(sql`
-SELECT ${ALL_CUSTOMERS_COLUMNS.join(',')}
-FROM Customer`)
+  const query = sql`
+    SELECT ${ALL_CUSTOMERS_COLUMNS.join(',')}
+    FROM Customer`
+
+  let predicate = options.filter
+    ? `\nWHERE companyName LIKE '%${options.filter.trim()}%' OR contactName LIKE '%${options.filter.trim()}%'`
+    : ''
+
+  return await db.all(query + predicate)
 }
 
 /**
